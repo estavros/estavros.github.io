@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My GitHub Projects</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        h1 { text-align: center; }
+        .repo {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        .repo a {
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: none;
+            color: #0366d6;
+        }
+        .repo p {
+            margin: 6px 0 0;
+        }
+    </style>
+</head>
+<body>
+
+<h1>My GitHub Projects</h1>
+<div id="repos">Loading...</div>
+
+<script>
+    const username = "estavros";
+
+    fetch(`https://api.github.com/users/${username}/repos?sort=updated`)
+        .then(response => response.json())
+        .then(repos => {
+            const container = document.getElementById("repos");
+            container.innerHTML = "";
+
+            repos.forEach(repo => {
+                const div = document.createElement("div");
+                div.className = "repo";
+                div.innerHTML = `
+                    <a href="${repo.html_url}" target="_blank">${repo.name}</a>
+                    <p>${repo.description || "No description provided."}</p>
+                `;
+                container.appendChild(div);
+            });
+        })
+        .catch(error => {
+            document.getElementById("repos").innerText = "Failed to load repositories.";
+            console.error(error);
+        });
+</script>
+
+</body>
+</html>
