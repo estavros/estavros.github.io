@@ -2,73 +2,146 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My GitHub Projects</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 <style>
+    /* Reset & base */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
     body {
         font-family: 'Roboto', sans-serif;
-        margin: 0;
-        padding: 40px;
-        background: #f5f7fa;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e0e7ff 100%);
+        padding: 40px 20px;
+        color: #333;
     }
     h1 {
         text-align: center;
-        margin-bottom: 40px;
-        color: #333;
+        margin-bottom: 50px;
+        font-size: 2.5rem;
+        color: #1a202c;
     }
+
+    /* Grid layout */
     #repos {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 30px;
+        max-width: 1200px;
+        margin: 0 auto;
     }
+
+    /* Repo cards */
     .repo {
         background: #fff;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        transition: transform 0.2s, box-shadow 0.2s;
+        border-radius: 15px;
+        padding: 25px 20px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
     .repo:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.12);
     }
     .repo a {
-        font-size: 18px;
-        font-weight: bold;
+        font-size: 1.2rem;
+        font-weight: 700;
         text-decoration: none;
-        color: #0366d6;
+        color: #4f46e5;
+        margin-bottom: 10px;
+        transition: color 0.3s ease;
+    }
+    .repo a:hover {
+        color: #6366f1;
     }
     .repo p {
-        margin: 10px 0 0;
+        font-size: 0.95rem;
         color: #555;
+        margin-bottom: 10px;
+        line-height: 1.5;
+    }
+    .repo .stats {
+        margin-top: auto;
+        font-size: 0.85rem;
+        color: #888;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+    .repo .stats span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .repo .stats svg {
+        width: 14px;
+        height: 14px;
+        fill: #fbbf24;
+    }
+
+    /* Loading / error message */
+    #repos.loading, #repos.error {
+        text-align: center;
+        font-size: 1.1rem;
+        color: #555;
+    }
+
+    @media (max-width: 500px) {
+        h1 {
+            font-size: 2rem;
+        }
     }
 </style>
 </head>
 <body>
 <h1>My GitHub Projects</h1>
-<div id="repos">Loading...</div>
+<div id="repos" class="loading">Loading...</div>
 
 <script>
 const username = "estavros";
+
+function starIcon() {
+    return '<svg viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568L24 9.423l-6 5.853L19.335 24 12 20.202 4.665 24 6 15.276 0 9.423l8.332-1.268z"/></svg>';
+}
+
+function forkIcon() {
+    return '<svg viewBox="0 0 448 512"><path d="M448 80c0-44.2-35.8-80-80-80s-80 35.8-80 80c0 42.5 32.9 77.3 75 79.8V176c-38.9 0-111.7 21.1-144.2 73.5-19.4 30.6-22.8 59.4-25.8 84.5-1.7 13-3.3 25.7-4.8 37.7-12.8 0-23.2 10.4-23.2 23.2s10.4 23.2 23.2 23.2c1.4 12 3.1 24.7 4.8 37.7 3 25.1 6.4 53.9 25.8 84.5C256.3 514.9 329.1 536 368 536v16c-42.1 2.5-75 37.3-75 79.8 0 44.2 35.8 80 80 80s80-35.8 80-80c0-42.5-32.9-77.3-75-79.8V416c38.9 0 111.7-21.1 144.2-73.5 19.4-30.6 22.8-59.4 25.8-84.5 1.7-13 3.3-25.7 4.8-37.7 12.8 0 23.2-10.4 23.2-23.2s-10.4-23.2-23.2-23.2c-1.4-12-3.1-24.7-4.8-37.7-3-25.1-6.4-53.9-25.8-84.5C374.3 197.1 301.5 176 262 176v-16c42.1-2.5 75-37.3 75-79.8z"/></svg>';
+}
 
 fetch(`https://api.github.com/users/${username}/repos?sort=updated`)
   .then(res => res.json())
   .then(repos => {
     const container = document.getElementById("repos");
     container.innerHTML = "";
+    if (!repos.length) {
+        container.className = "error";
+        container.innerText = "No repositories found.";
+        return;
+    }
     repos.forEach(repo => {
       const div = document.createElement("div");
       div.className = "repo";
       div.innerHTML = `
         <a href="${repo.html_url}" target="_blank">${repo.name}</a>
         <p>${repo.description || "No description provided."}</p>
-        <p>⭐ ${repo.stargazers_count} | 🍴 ${repo.forks_count}</p>
+        <div class="stats">
+            <span>${starIcon()} ${repo.stargazers_count}</span>
+            <span>${forkIcon()} ${repo.forks_count}</span>
+        </div>
       `;
       container.appendChild(div);
     });
   })
   .catch(() => {
-    document.getElementById("repos").innerText = "Failed to load repositories.";
+    const container = document.getElementById("repos");
+    container.className = "error";
+    container.innerText = "Failed to load repositories.";
   });
 </script>
 </body>
