@@ -117,14 +117,19 @@ function forkIcon() {
 fetch(`https://api.github.com/users/${username}/repos?sort=updated`)
   .then(res => res.json())
   .then(repos => {
+    // Exclude the GitHub Pages repo
+    const filteredRepos = repos.filter(repo => repo.name !== `${username}.github.io`);
+
     const container = document.getElementById("repos");
     container.innerHTML = "";
-    if (!repos.length) {
+
+    if (!filteredRepos.length) {
         container.className = "error";
         container.innerText = "No repositories found.";
         return;
     }
-    repos.forEach(repo => {
+
+    filteredRepos.forEach(repo => {
       const div = document.createElement("div");
       div.className = "repo";
       div.innerHTML = `
@@ -143,6 +148,7 @@ fetch(`https://api.github.com/users/${username}/repos?sort=updated`)
     container.className = "error";
     container.innerText = "Failed to load repositories.";
   });
+
 </script>
 </body>
 </html>
